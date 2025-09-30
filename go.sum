@@ -1,0 +1,6 @@
+github.com/ishbir/elliptic v0.0.0-20150227224012-7fa75501baae h1:p4rT8RR3B5Q6rXTG5v0Tns45zn4wJucqQKF5hzrjtgU=
+github.com/ishbir/elliptic v0.0.0-20150227224012-7fa75501baae/go.mod h1:JPqapJUq3G3ojsWKJHZNsUK2OJmarnOxFN9afp3/Ovo=
+github.com/markdingo/netstring v1.0.2 h1:FptMPZdF/1QbW4gf8oVB7qE1GtZf7DgM7wq5o+dtS8o=
+github.com/markdingo/netstring v1.0.2/go.mod h1:zfPc/km8bb/5yGxJpuFLSdFfyqe/ZLTTwsC4zJS2JzI=
+golang.org/x/text v0.29.0 h1:1neNs90w9YzJ9BocxfsQNHKuAT4pkghyXc4nhZ6sJvk=
+golang.org/x/text v0.29.0/go.mod h1:7MhJOA9CD2qZyOKYazxdYMF85OwPdEr9jTtBpO7ydH4=
