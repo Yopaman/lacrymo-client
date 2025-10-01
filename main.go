@@ -6,6 +6,7 @@ import (
 	"crypto/cipher"
 	"crypto/hmac"
 	"crypto/sha256"
+	"flag"
 	"fmt"
 	"hash"
 	"net"
@@ -29,7 +30,15 @@ var cStream cipher.Stream
 
 func main() {
 
-	conn, err := net.Dial("tcp", "lacrymo.tme-crypto.fr:6025")
+	var hostname = flag.String("h", "lacrymo.tme-crypto.fr", "Server hostname")
+	var port = flag.String("p", "6025", "Server port")
+	var privateKey = flag.String("sk", "./private-key.pem", "Private key")
+	var serverPublicKey = flag.String("pk", "./server-public-key.pem", "Server public key")
+	var username = flag.String("u", "pablo.hardouin", "Username")
+
+	flag.Parse()
+
+	conn, err := net.Dial("tcp", *hostname+":"+*port)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "connect error:", err)
 		os.Exit(1)
@@ -39,7 +48,7 @@ func main() {
 	enc := netstring.NewEncoder(conn)
 	dec := netstring.NewDecoder(conn)
 
-	diffieHellman(enc, dec, "../private-key.pem", "../server-public-key.pem")
+	diffieHellman(enc, dec, *privateKey, *serverPublicKey, *username)
 
 	cBlock, err := aes.NewCipher(cKaes[:16])
 	if err != nil {
