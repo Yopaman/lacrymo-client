@@ -51,7 +51,12 @@ func main() {
 	enc := netstring.NewEncoder(conn)
 	dec := netstring.NewDecoder(conn)
 
-	diffieHellman(enc, dec, *privateKey, *serverPublicKey, *username)
+	for {
+		ok := diffieHellman(enc, dec, *privateKey, *serverPublicKey, *username)
+		if ok {
+			break
+		}
+	}
 
 	cBlock, err := aes.NewCipher(cKaes[:16])
 	if err != nil {
