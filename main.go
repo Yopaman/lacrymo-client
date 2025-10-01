@@ -1,7 +1,7 @@
 package main
 
 import (
-	"bufio"
+	"context"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/hmac"
@@ -11,8 +11,12 @@ import (
 	"hash"
 	"net"
 	"os"
+	"os/exec"
+	"os/signal"
+	"syscall"
 
 	"github.com/markdingo/netstring"
+	"github.com/pkg/term"
 )
 
 var sKaes []byte
@@ -29,7 +33,6 @@ var sStream cipher.Stream
 var cStream cipher.Stream
 
 func main() {
-
 	var hostname = flag.String("h", "lacrymo.tme-crypto.fr", "Server hostname")
 	var port = flag.String("p", "6025", "Server port")
 	var privateKey = flag.String("sk", "./private-key.pem", "Private key")
@@ -63,14 +66,28 @@ func main() {
 	sStream = cipher.NewCTR(sBlock, sKiv[:16])
 	sMac = hmac.New(sha256.New, sKmac[:16])
 
+	term, err := term.Open("/dev/tty")
+	if err != nil {
+		panic("term open error")
+	}
+	term.SetCbreak()
+
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer cancel()
+
 	go handleTelnet(dec, enc)
 
-	// Send user input to server
-	scanner := bufio.NewScanner(os.Stdin)
-	for scanner.Scan() {
-		line := scanner.Text() + "\r\n" // telnet expects CRLF
-		if err := encryptAndSend(enc, []byte(line)); err != nil {
-			break
-		}
-	}
+	go func() {
+		<-ctx.Done()
+		cmd := exec.Command("reset")
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		cmd.Run()
+		println("\nReceived SIGTERM. Stopping.")
+		term.Restore()
+		os.Exit(0)
+	}()
+
+	// Send stdin inputs to the server
+	sendLoop(enc)
 }

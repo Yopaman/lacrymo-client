@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"compress/zlib"
 	"errors"
@@ -113,6 +114,8 @@ func negotiate(enc *netstring.Encoder, verb, opt byte) {
 		if verb == DO {
 			send(enc, IAC, WILL, BINARY)
 		}
+	case ECHO:
+		send(enc, IAC, WILL, ECHO)
 	default:
 		// refuse unknowns
 		switch verb {
@@ -127,6 +130,7 @@ func negotiate(enc *netstring.Encoder, verb, opt byte) {
 func handleTelnet(dec *netstring.Decoder, enc *netstring.Encoder) {
 
 	for {
+
 		ns, err := handleNetstring(dec)
 		if err != nil {
 			panic(err)
@@ -199,4 +203,15 @@ func handleNetstring(dec *netstring.Decoder) ([]byte, error) {
 		return nil, errors.New("Error decoding netstring : " + err.Error())
 	}
 	return ns, nil
+}
+
+func sendLoop(enc *netstring.Encoder) {
+	reader := bufio.NewReader(os.Stdin)
+	for {
+		ch, err := reader.ReadByte()
+		if err != nil {
+			break
+		}
+		send(enc, ch)
+	}
 }
